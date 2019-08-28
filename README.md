@@ -27,3 +27,7 @@ The user must input the names of their TTrees, branches corresponding to channel
 * Thresholds are not modeled, so care should be taken to ensure the fit range is far enough away from threshold such that the fits are not being affected by threshold effects.
 * Binning can affect fits, so studies should be done on how binning influences the fits and errors should be manually incorporated into the final parameter values. 
 * RooKeysPDFs need to do a good job approximating the data over the fit range. This should be checked for background RooKeysPdf and first few simulation RooKeysPdfs. The Mirroring option, and interpolation number (last argument when generating the RooKeysPdfs) may need to be adjusted.
+
+## Known bugs:
+
+## Theory:
