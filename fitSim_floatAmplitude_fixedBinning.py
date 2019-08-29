@@ -1,7 +1,6 @@
 #This version of the fitting code loops over values of different fitting parameters in discrete steps,
 #fits the ampltitude of the simulation PDF, and returns the NLL value. This utilizes a binned simulation
-#and data PDFS, which requires an approximate guess of the conversion from energy units to keV (with
-# 50% by default). Care should be taken to test the effect of binning on parameter values.
+#and bgnd PDFs. Care should be taken to test the effect of binning on parameter values.
 #
 #This code outputs three things to the specified output file
 #	fitTree: containing fit parameters for each fit
@@ -15,7 +14,7 @@ import math
 import gc
 
 #Specify number of bins for PDFs, over the entire import range (lowerEnergyBound, upperEnergyBound)
-nBins=500
+nBins=200
 
 #Specify how many threads to use for fit
 numCPUForFits=1
@@ -98,8 +97,8 @@ upperEnergyBound = 20000
 #usually between 0 and 25 keV
 
 #Specify slope range and number of steps to include between that range here
-slopeMin=0.5
-slopeMax=1.5
+slopeMin=15
+slopeMax=21
 numSlopeSteps=4
 
 #Specify offset here. Note that because of the way I define offset later, I think this
@@ -565,8 +564,6 @@ for testAlpha in numpy.linspace(alphaMin,alphaMax,numAlphaSteps):
 					del simPdf
 					model.Delete()
 					del model
-					if plotKeysPDfs==1:
-						del c3
 					gc.collect()
 					
 print("Found lowest NLL value of "+str(bestNLL)+" for alpha="+str(bestAlpha)+", beta="+str(bestBeta)+", gamma="+str(bestGamma)+", slope="+str(bestSlope)+", offset="+str(bestOffset)+"\n\n\n")			
