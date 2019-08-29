@@ -461,7 +461,7 @@ for testAlpha in numpy.linspace(alphaMin,alphaMax,numAlphaSteps):
 					for entry in range(0,nSimEntries):
 						#Calculate mean and sigma
 						mean = simDataSet.get(entry).getRealValue("energyVar")
-						sigma = math.sqrt(pow(testAlpha*mean,2)+pow(testBeta,2)*mean+pow(testGamma,2))
+						sigma = 1./2.355 * math.sqrt(pow(testAlpha*mean,2)+pow(testBeta,2)*mean+pow(testGamma,2))
 						#Generate a smeared values
 						if binningType=="fixed":
 							smearedVal = numpy.random.normal(mean,sigma,1)*prescaling
@@ -478,7 +478,7 @@ for testAlpha in numpy.linspace(alphaMin,alphaMax,numAlphaSteps):
 					#Make variable for ADC->keV conversion
 					slopeVar = ROOT.RooRealVar("slopeVar","slopeVar",(slopeMin+slopeMax)/2.,slopeMin,slopeMax)
 					offsetVar = ROOT.RooRealVar("offsetVar","offsetVar",(offsetMin+offsetMax)/2.,offsetMin,offsetMax)
-					#We're going to use a variable transform, keV = ADC/slope + offset
+					#We're going to use a variable transform, if ADC = slope * (keV - offset) => keV = ADC/slope + offset
 					scaling = ROOT.RooFormulaVar("scaling","energyVar/slopeVar+offsetVar",ROOT.RooArgList(energyVar,slopeVar,offsetVar))
 
 					######################################################

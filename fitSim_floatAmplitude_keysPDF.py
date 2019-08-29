@@ -464,7 +464,7 @@ for testAlpha in numpy.linspace(alphaMin,alphaMax,numAlphaSteps):
 					for entry in range(0,nSimEntries):
 						#Calculate mean and sigma
 						mean = simDataSet.get(entry).getRealValue("energyVar")
-						sigma = math.sqrt(pow(testAlpha*mean,2)+pow(testBeta,2)*mean+pow(testGamma,2))
+						sigma = 1./2.355 * math.sqrt(pow(testAlpha*mean,2)+pow(testBeta,2)*mean+pow(testGamma,2))
 						#Generate a smeared values
 						smearedVal = testSlope*(numpy.random.normal(mean,sigma,1) - testOffset)
 						#If the smeared value is in the import range, add to the smeared data set
