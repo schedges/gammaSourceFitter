@@ -34,4 +34,30 @@ The user must input the names of their TTrees, branches corresponding to channel
 * There is a memory leak where RooFit objects are not deleted in the loop. I've done what I can to minimize this, but think it is a RooFit bug.
 
 ## Theory:
+### Liquid scintillators 
+The light output of liquid scintillators is typically thought to be linear with energy at higher energies (>~50 keVee) [1]. Conversion from an arbitrary energy unit (peak high value, integral, max of an FIR, etc.) to a real energy unit (keV, MeV) is typically done using two parameters, a slope and an offset (reflecting low-energy non-linearities)
 
+Light output = slope*(keV - offset)
+
+where offsets range from ~0-25 keV. Typically in liquid scintillators, it is difficult to see full deposition peaks from gamma sources, so using Compton peaks to calibrate is often not possible. Fitting the Compton edge is possible, but energy resolution needs to be understood to do this reliably. Energy resolution is usually parameterized as
+
+FWHM/E = 2.355 * sigma/E = sqrt(alpha^2 + beta^2/E + gamma^2)
+
+ with typical values of alpha ranging from 0.1-0.15, beta  from 0.05-0.135, and gamma  from 0.002-0.065.
+
+### Plastic Scintillators
+The above typically holds true for plastic scintillators, but generally different energy resolution functions are used, either
+
+sigma = 1/2.355 * sqrt(a * E)
+
+with a between 0.014 and 0.032 [2], or
+
+sigma = sqrt(A * E^2 + B * E).
+
+with A~0.0162, B~0.0105 [3]
+
+
+### Sources
+[1]https://www.sciencedirect.com/science/article/pii/S0168900298006792
+[2]https://arxiv.org/abs/1004.3779
+[3]https://www.sciencedirect.com/science/article/pii/0029554X71903703
