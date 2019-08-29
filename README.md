@@ -54,7 +54,7 @@ with a between 0.014 and 0.032 [2], or
 
 sigma = sqrt(A * E^2 + B * E).
 
-with A~0.0162, B~0.0105 [3]
+with A around 0.0162, and B around 0.0105 [3]
 
 
 ### Sources
