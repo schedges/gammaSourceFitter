@@ -18,8 +18,8 @@ There are a few other approaches that could be tried:
 The user must input the names of their TTrees, branches corresponding to channel number, energy, and time (the latter only applicable for data trees, not simulation trees). The code assumes the background data tree structure and source data tree structure follow the same structure. Ranges for resolution and energy conversion variables needs to be specified. Basically everything up to the "main code starts here" line needs to be adjusted to the specifics of your data. There are a few things that can be adjusted later in the code if necessary.
 
 ## Output of the code:
-* A Ttree containing all data about the fits including parameter values, errors, status, nll value, etc.
-* A Ttree contaiing the above for the fit with the lowest NLL values
+* A TTree containing all data about the fits including parameter values, errors, status, nll value, etc.
+* A TTree contaiing the above for the fit with the lowest NLL values
 * TCanvases of any fit that replaces the previous best fit.
 
 ## Notes/pitfalls:
