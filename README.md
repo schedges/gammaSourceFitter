@@ -58,6 +58,6 @@ with A around 0.0162, and B around 0.0105 [3]
 
 
 ### Sources
-[1]https://www.sciencedirect.com/science/article/pii/S0168900298006792
-[2]https://arxiv.org/abs/1004.3779
-[3]https://www.sciencedirect.com/science/article/pii/0029554X71903703
+* [1]https://www.sciencedirect.com/science/article/pii/S0168900298006792
+* [2]https://arxiv.org/abs/1004.3779
+* [3]https://www.sciencedirect.com/science/article/pii/0029554X71903703
