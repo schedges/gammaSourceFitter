@@ -493,15 +493,15 @@ for testAlpha in numpy.linspace(alphaMin,alphaMax,numAlphaSteps):
 					###########
 					#Fit model#
 					###########
-					res = model.fitTo(sourceDataSet,
-									  ROOT.RooFit.Extended(1),
-									  ROOT.RooFit.Range("fitRange"),
-									  ROOT.RooFit.SumCoefRange("fitRange"),
-									  ROOT.RooFit.NumCPU(numCPUForFits),
-									  ROOT.RooFit.Verbose(0),
-									  ROOT.RooFit.PrintLevel(-1),
-									  ROOT.RooFit.Save(True)
-									)
+					#res = model.fitTo(sourceDataSet,
+					#				  ROOT.RooFit.Extended(1),
+					#				  ROOT.RooFit.Range("fitRange"),
+					#				  ROOT.RooFit.SumCoefRange("fitRange"),
+					#				  ROOT.RooFit.NumCPU(numCPUForFits),
+					#				  ROOT.RooFit.Verbose(0),
+					#				  ROOT.RooFit.PrintLevel(-1),
+					#				  ROOT.RooFit.Save(True)
+					#				)
 
 					########
 					##Plot##
@@ -509,7 +509,7 @@ for testAlpha in numpy.linspace(alphaMin,alphaMax,numAlphaSteps):
 					c1.cd()
 					#Make frame, set title
 					frame = energyVar.frame(fitRangeMin,fitRangeMax)
-					frame.SetTitle("alpha="+str(testAlpha)+", beta="+str(testBeta)+", gamma="+str(testGamma))
+					frame.SetTitle("alpha="+str(testAlpha)+", beta="+str(testBeta)+", gamma="+str(testGamma)+", slope="+str(slopeVar.getVal())+", offset="+str(offsetVar.getVal()))
 					#Plot source data
 					sourceDataSet.plotOn(frame,ROOT.RooFit.Name("Source"),ROOT.RooFit.Binning(binning),ROOT.RooFit.MarkerColor(1),ROOT.RooFit.FillColor(0) )
 					#Plot model and components
@@ -548,24 +548,24 @@ for testAlpha in numpy.linspace(alphaMin,alphaMax,numAlphaSteps):
 					gammaError[0]=(gammaMax-gammaMin)/numBetaSteps
 					
 					if binningType=="fixed":
-						slope[0]=testSlope*prescaling
+						slope[0]=slopeVar.getVal()*prescaling
 						slopeError[0]=slopeVar.getError()*prescaling
 					else:
-						slope[0]=testSlope
+						slope[0]=slopeVar.getVal()
 						slopeError[0]=slopeVar.getError()
 					
-					offset[0]=testOffset
+					offset[0]=offsetVar.getVal()
 					offsetError[0]=offsetVar.getError()
 					
-					fitNLL[0] = res.minNll();
-					print("Fit nll:"+str(res.minNll()))
+					#fitNLL[0] = res.minNll();
+					print("Fit nll:"+str(fitNLL[0]))
 					
 					#Extended
 					fitBgndCounts[0] = scaledBgndEntriesVar.getVal()
 					fitSourceCounts[0] = sourceCountsVar.getVal()
 					fitSourceCountsError[0] = sourceCountsVar.getError()
 							     
-					fitStatus[0] = res.status()
+					#fitStatus[0] = res.status()
 							      
 					fitTree.Fill()
 					
@@ -590,7 +590,7 @@ for testAlpha in numpy.linspace(alphaMin,alphaMax,numAlphaSteps):
 						
 						#Updated code to only write new lower NLL plots
 						outputFile.cd()
-						c1.Write("alpha_"+str(testAlpha)+"beta_"+str(testBeta)+"gamma_"+str(testGamma)+"_slope"+str(testSlope)+"_offset"+str(testOffset))
+						c1.Write("alpha_"+str(testAlpha)+"beta_"+str(testBeta)+"gamma_"+str(testGamma)+"_slope"+str(bestSlope)+"_offset"+str(bestOffset))
 					
 					
 					#There's a memory leak, trying to fix
