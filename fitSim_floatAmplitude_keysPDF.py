@@ -142,14 +142,16 @@ numGammaSteps= 3
 #For printing purposes only
 totalSteps = numSlopeSteps*numOffsetSteps*numAlphaSteps*numBetaSteps*numGammaSteps
 
-#For plastic scintillators, simpler form sometimes used r = sqrt(a/E) 
-#e.g. https://arxiv.org/abs/1004.3779 where a varied from 0.014 to 0.032 for 
-#those blocks. May need larger range for different sized detectors
+#For plastic scintillators, simpler form sometimes used FWHM/E = sqrt(a/E)
+# => sigma = 1/2.355 * sqrt(a*E)
+#e.g. https://arxiv.org/abs/1004.3779 where a varied from 0.014 to 0.032 for
+#those blocks. May need larger range for different sized detectors.
 #
-#Another group uses (sigma/E)^2 = A + B/E and found A = 0.0162, B=0.0105 for their
+#Another group uses (sigma/E)^2 = A + B/E
+#=> sigma = sqrt(A*E^2+B*E)
+#and found A = 0.0162, B=0.0105 for their
 #detectors: https://www.sciencedirect.com/science/article/pii/0029554X71903703
 #They justified that the non-linear response for their plastic was zero, so there was no third term
-
 
 ###################
 ##RooFit Settings##
