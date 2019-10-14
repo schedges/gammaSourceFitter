@@ -42,8 +42,8 @@ nBins=100
 
 #If you use these, you should plot the keys PDF to ensure it matches the data. You 
 #may also need to manually edit the KeysPdf generation lines to change the smoothing
-useBgndKeysPDF=0
-useSimKeysPdf=0
+useBgndKeysPdf=1
+useSimKeysPdf=1
 
 #Specify how many threads to use for fit
 numCPUForFits=1
@@ -53,7 +53,7 @@ fractionOfDataToUse=1.0
 
 #How many smeared points to generate for each real point, makes a smoother PDF
 #without requiring increase to number of sim events
-valsToGen=12
+valsToGen=1
 
 #Canvas for plotting 
 c1 = ROOT.TCanvas("c1","c1")
@@ -92,7 +92,7 @@ dataTreeTime = array.array(dataTreeTimeBranchType,[0])
 ##Specify sim format/names here##
 #################################
 #For sim trees with multiple channels, specify the channel number here
-simTreeChannelNum=chanNum
+simTreeChannelNum=0
 
 #Specify name of simulation file (and path if not in current directory)
 simFilename = "sim-na22-1e7.root"
@@ -231,7 +231,7 @@ ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-7)
 energyVar = ROOT.RooRealVar("energyVar","energyVar",importLowerEnergyBound,importUpperEnergyBound)
 energyVar.setRange("fitRange",fitRangeMin,fitRangeMax)
 #If either sim or source PDF is binned, define binning variable 
-if not useBgndKeysPDF==0 && useSimKeysPdf==0:
+if useBgndKeysPdf==0 or useSimKeysPdf==0:
 	binning = ROOT.RooBinning(nBins,importLowerEnergyBound,importUpperEnergyBound,"binning")
 	energyVar.setBinning(binning)
 #We'll apply this cut to the source and bgnd data sets solely for determining the expected
@@ -290,7 +290,7 @@ bgndCountsInFitRange = reducedDataSet.numEntries()
 print("Found "+str(bgndCountsInFitRange)+" bgnd entries in the fit range")
 
 #Make background pdf
-if useBgndKeysPDF==0:
+if useBgndKeysPdf==0:
 	(bgndDataSet.get().find("energyVar")).setBins(nBins)
 	bgndDataHist = bgndDataSet.binnedClone()
 	bgndDataPdf = ROOT.RooHistPdf("bgndDataPdf","bgndDataPdf",argSet,bgndDataHist,1) #1 specifies interpolation order
@@ -548,7 +548,7 @@ for testAlpha in numpy.linspace(alphaMin,alphaMax,numAlphaSteps):
 					#Plot source data
 					sourceDataSet.plotOn(frame,ROOT.RooFit.Name("Source"),ROOT.RooFit.MarkerColor(1),ROOT.RooFit.FillColor(0) )
 					#Plot model and components
-						model.plotOn(frame,ROOT.RooFit.Name("Fit"),ROOT.RooFit.LineColor(ROOT.kRed),ROOT.RooFit.FillColor(0),ROOT.RooFit.ProjWData(sourceDataSet))
+					model.plotOn(frame,ROOT.RooFit.Name("Fit"),ROOT.RooFit.LineColor(ROOT.kRed),ROOT.RooFit.FillColor(0),ROOT.RooFit.ProjWData(sourceDataSet))
 					model.plotOn(frame,ROOT.RooFit.Name("Bgnd"),ROOT.RooFit.Components("bgndDataPdf"),ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.LineColor(ROOT.kBlack),ROOT.RooFit.FillColor(0),ROOT.RooFit.ProjWData(sourceDataSet))
 					model.plotOn(frame,ROOT.RooFit.Name("Sim"),ROOT.RooFit.Components("simPdf"),ROOT.RooFit.LineStyle(ROOT.kDashed), ROOT.RooFit.LineColor(ROOT.kBlue),ROOT.RooFit.FillColor(0),ROOT.RooFit.ProjWData(sourceDataSet))
 					#Draw
