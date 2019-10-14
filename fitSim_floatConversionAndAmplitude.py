@@ -106,7 +106,7 @@ if binningType=="fixed":
 	prescaling=17 #Guess at conversion of arbitrary energy to keV. By default expected to be within 50% of true value
 #Specify bins over different ranges
 else:
-	binning = ROOT.RooBinning(lowerEnergyBound,lowerEnergyBound,"binning")
+	binning = ROOT.RooBinning(lowerEnergyBound,upperEnergyBound,"binning")
 	#Add bins from lowerEnergyBound to 1000 in steps of 2
 	for i in range(lowerEnergyBound,1000,2):
 		binning.addBoundary(i)

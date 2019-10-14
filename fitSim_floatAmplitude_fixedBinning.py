@@ -620,6 +620,8 @@ for testAlpha in numpy.linspace(alphaMin,alphaMax,numAlphaSteps):
 					del simPdf
 					model.Delete()
 					del model
+					smearedSimDataHist.Delete()
+					del smearedSimDataHist
 					gc.collect()
 					
 print("Found lowest NLL value of "+str(bestNLL)+" for alpha="+str(bestAlpha)+", beta="+str(bestBeta)+", gamma="+str(bestGamma)+", slope="+str(bestSlope)+", offset="+str(bestOffset)+"\n\n\n")			
