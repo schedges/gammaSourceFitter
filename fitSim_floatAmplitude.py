@@ -26,11 +26,11 @@ nBins=100
 
 # Set to 1 to limit source entries to a maxSourceEntries, reduce to speed up
 limitMaxSourceEntries=0
-maxSourceEntries=100000
+maxSourceEntries=150000
 
 # Set to 1 to limit simulation entries to maxSimEntries, reduce to speed up
 limitMaxSimEntries=1
-maxSimEntries=100000
+maxSimEntries=150000
 
 # How many smeared points to generate for each real point, makes a smoother PDF
 # and helps to fit resolution parameters, but can slow things down
@@ -100,14 +100,14 @@ importUpperEnergyBound = 150000
 #where c=slope and E_0=offset, typically between 0 and 25 keV
 
 #Specify slope min, slope max, and number of steps
-slopeMin=14
-slopeMax=24
-numSlopeSteps=6
+slopeMin=50
+slopeMax=70
+numSlopeSteps=2
 
 #Specify offset min, offset max, and number of steps
 offsetMin=-10
 offsetMax=25
-numOffsetSteps=6
+numOffsetSteps=1
 
 #########################
 ##Resolution parameters##
@@ -126,15 +126,15 @@ numOffsetSteps=6
 # when comparing your calibration parameters to other's.
 alphaMin = 0.04
 alphaMax = 0.12
-numAlphaSteps = 6
+numAlphaSteps = 2
 
 betaMin = 0.05
 betaMax = 3
-numBetaSteps = 6
+numBetaSteps = 2
 
 gammaMin = 0.00
 gammaMax = 3
-numGammaSteps=6
+numGammaSteps=1
 
 # For plastic scintillators, simpler form sometimes used FWHM/E = sqrt(a/E) =>
 # sigma = 1/2.355 * sqrt(a*E)
@@ -382,7 +382,7 @@ betaSpace=numpy.linspace(betaMin,betaMax,numBetaSteps)
 gammaSpace=numpy.linspace(gammaMin,gammaMax,numGammaSteps)
 slopeSpace=numpy.linspace(slopeMin,slopeMax,numSlopeSteps)
 offsetSpace=numpy.linspace(offsetMin,offsetMax,numOffsetSteps)
-
+ 
 #Combine to make a parameter set we'll iterate through
 parametersToFit=[]
 for i in alphaSpace:
@@ -462,13 +462,13 @@ def smearAndFit(parSet):
       c1
     except NameError:
       c1=ROOT.TCanvas("c1","c1")
-       
+      
     #Reduce integrator for plotting, massively speeds things up
-    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-4)
-    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-4)
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-5)
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-5)
      
-    frame = energyVar.frame(importUpperEnergyBound,importUpperEnergyBound,nBins)
-    frame.SetTitle("Alpha="+str(alpha[0])+", Beta="+str(beta[0])+", Gamma="+str(gamma[0])+", Slope="+str(slope[0])+", Offset="+str(offset[0]))
+    frame = energyVar.frame(importLowerEnergyBound,importUpperEnergyBound,nBins)
+    frame.SetTitle("Alpha="+str(alpha)+", Beta="+str(beta)+", Gamma="+str(gamma)+", Slope="+str(slope)+", Offset="+str(offset))
 
     #Plot source data
     sourceDataSet.plotOn(
@@ -476,7 +476,6 @@ def smearAndFit(parSet):
       ROOT.RooFit.Name("Source"),
       ROOT.RooFit.MarkerColor(1),
       ROOT.RooFit.FillColor(0),
-      ROOT.RooFit.Range("fitRange")
     )
     #Plot components
     model.plotOn(
@@ -485,8 +484,7 @@ def smearAndFit(parSet):
       ROOT.RooFit.Components("bgndDataPdf"),
       ROOT.RooFit.LineColor(ROOT.kSolid),
       ROOT.RooFit.FillColor(0),
-      ROOT.RooFit.ProjWData(sourceDataSet),
-      ROOT.RooFit.Range("fitRange")
+      ROOT.RooFit.ProjWData(sourceDataSet)
     )
     model.plotOn(
       frame,ROOT.RooFit.Name("Sim"),
@@ -494,8 +492,7 @@ def smearAndFit(parSet):
       ROOT.RooFit.LineColor(ROOT.kRed),
       ROOT.RooFit.FillColor(0),
       ROOT.RooFit.ProjWData(sourceDataSet),
-      ROOT.RooFit.AddTo("Bgnd"),
-      ROOT.RooFit.Range("fitRange")
+      ROOT.RooFit.AddTo("Bgnd")
     )
 
     #Draw
@@ -566,7 +563,7 @@ for parSet in parametersToFit:
   currentNLL=theta[len(fitVarNames)]
   if currentNLL<bestNll:
     bestNll=currentNLL
-    betaTheta=theta
+    bestTheta=theta
 
 print("Best nll: "+str(bestNll)+" with par set: "+str(bestTheta))
 
@@ -626,6 +623,9 @@ for parNum in range(0, len(fitVarNames)):
 		nPoints+=1
 
 	graphs[-1].SetMarkerStyle(20)
+
+PLOT=1
+smearAndFit(bestTheta)
 
 #####################
 #Write trees to file#
