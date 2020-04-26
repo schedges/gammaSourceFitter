@@ -100,14 +100,14 @@ importUpperEnergyBound = 150000
 #where c=slope and E_0=offset, typically between 0 and 25 keV
 
 #Specify slope min, slope max, and number of steps
-slopeMin=50
-slopeMax=70
-numSlopeSteps=2
+slopeMin=65
+slopeMax=75
+numSlopeSteps=5
 
 #Specify offset min, offset max, and number of steps
 offsetMin=-10
 offsetMax=25
-numOffsetSteps=1
+numOffsetSteps=3
 
 #########################
 ##Resolution parameters##
@@ -124,17 +124,17 @@ numOffsetSteps=1
 # the definition of this parameter. It seems like there are some variations in
 # literature as to whether that 2.355 is there or not, but it should only matter
 # when comparing your calibration parameters to other's.
-alphaMin = 0.04
-alphaMax = 0.12
-numAlphaSteps = 2
+alphaMin = 0.01
+alphaMax = 0.06
+numAlphaSteps = 5
 
-betaMin = 0.05
-betaMax = 3
-numBetaSteps = 2
+betaMin = 0.00
+betaMax = 1
+numBetaSteps = 4
 
 gammaMin = 0.00
 gammaMax = 3
-numGammaSteps=1
+numGammaSteps=3
 
 # For plastic scintillators, simpler form sometimes used FWHM/E = sqrt(a/E) =>
 # sigma = 1/2.355 * sqrt(a*E)
@@ -602,7 +602,7 @@ for parNum in range(0, len(fitVarNames)):
 	
 	#Make list of unique values of this parameter
 	uniqueElementList=[]
-	for parSet in results:
+	for parSet in shortenedResults:
 		if parSet[parNum] not in uniqueElementList:
 			uniqueElementList.append(parSet[parNum])
 
@@ -610,7 +610,7 @@ for parNum in range(0, len(fitVarNames)):
 	minNlls=[]
 	for uniqueElement in uniqueElementList:
 		nlls=[]
-		for parSet in results:
+		for parSet in shortenedResults:
 			if parSet[parNum]==uniqueElement:
 				nlls.append(parSet[-1])
 
