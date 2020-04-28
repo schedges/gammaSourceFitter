@@ -1,8 +1,8 @@
 ## Overview
 This code was originally designed to be used to calibrate liquid scintillator detectors using gamma sources. It is a python and RooFit-based code that requires a simulation of the source (MCNP, GEANT, etc.), a background run without source, and a source run. A RooAddPdf is created combining the background run and simulation (modified by scaling and energy resolution parameters that float), and the result is fit to the source data.
 
-* **fitSim_emcee_simultaneous.py**: Uses the python emcee package (https://emcee.readthedocs.io/en/stable/). The recommended way to use this code. Requires matplotlib, tqdm, emcee, and corner.
-* **fitSim_floatAmplitude.py**: Non-emcee version of the code, outdated! Steps through resolution parameters and energy conversion parameters in discrete steps, fitting only the amplitude of the simulation PDF for each set of parameters. The NLL is computed for each step, and the lowest NLL value is returned.
+* **fitSim_emcee_simultaneous.py**: Uses the python emcee package (https://emcee.readthedocs.io/en/stable/). The recommended way to use this code. Requires matplotlib, tqdm, emcee, and corner. Can fit multiple gamma sources simultaneously.
+* **fitSim_floatAmplitude.py**: Non-emcee version of the code, outdated! Steps through resolution parameters and energy conversion parameters in discrete steps, fitting only the amplitude of the simulation PDF for each set of parameters. The NLL is computed for each step, and the lowest NLL value is returned. Can only fit a single gamma source at a time.
 
 ## How to use the code:
  The user must specify some set-up at the start of the code (binning, background pdf type, file paths, tree/branch names, channel numbers, etc.) The code assumes the background data tree structure and source data tree structure follow the same structure. Ranges for resolution and energy conversion variables needs to be specified. 
