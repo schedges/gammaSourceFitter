@@ -1,23 +1,19 @@
-# gammaSourceFitter
-Given a background run, source simulation, and source run, fits simulation + bgnd to source to get conversion from arbitrary unit to keV and energy-dependent energy resolution parameters
-
 ## Overview
-This code was originally designed to be used to calibrate liquid scintillator detectors. It is a python RooFit based code that requires a simulation, background run, and source run. A RooAddPdf is created combining the background run and simulation (modified by scaling and energy resolution parameters), and the result is fit to the source data.
+This code was originally designed to be used to calibrate liquid scintillator detectors using gamma sources. It is a python and RooFit-based code that requires a simulation of the source (MCNP, GEANT, etc.), a background run without source, and a source run. A RooAddPdf is created combining the background run and simulation (modified by scaling and energy resolution parameters that float), and the result is fit to the source data.
 
-* **fitSim_floatAmplitude.py**: OUTDATED! Need to update with efficiencies used in emcee version. Steps through resolution parameters and conversion to ADC parameters in discrete steps, fitting only the amplitude of the simulation PDF. The NLL is computed for each step, and the lowest NLL value is returned. There are options to either use a RooKeysPdf for background and/or simulations, or binned PDFs. Using keys PDFs allows for unbinned fits, but care must be taken that the RooKeysPDFs do a good job representing the actual background and simulation data. The interpolation parameters and mirroring options when generating the RooKeysPDF can be used to control this. The binned version should be quicker to fit, but binning effects on the parameters and errors must be studied.
-* **fitSim_emcee_simultaneous.py**: Recommended to use this one. See code comments for a description on how to run. 
+* **fitSim_emcee_simultaneous.py**: Uses the python emcee package (https://emcee.readthedocs.io/en/stable/). The recommended way to use this code.
+* **fitSim_floatAmplitude.py**: Non-emcee version of the code, outdated! Steps through resolution parameters and energy conversion parameters in discrete steps, fitting only the amplitude of the simulation PDF for each set of parameters. The NLL is computed for each step, and the lowest NLL value is returned.
 
 ## How to use the code:
-The user must input the names of their TTrees, branches corresponding to channel number, energy, and time (the latter only applicable for data trees, not simulation trees). The code assumes the background data tree structure and source data tree structure follow the same structure. Ranges for resolution and energy conversion variables needs to be specified. Basically everything up to the "main code starts here" line needs to be adjusted to the specifics of your data. There are a few things that can be adjusted later in the code if necessary.
+ The user must specify some set-up at the start of the code (binning, background pdf type, file paths, tree/branch names, channel numbers, etc.) The code assumes the background data tree structure and source data tree structure follow the same structure. Ranges for resolution and energy conversion variables needs to be specified. 
 
 ## Output of fitSim_floatAmplitude.py:
-* A TTree containing all data about the fits including parameter values, status, nll value
-* A TTree contaiing the above for the fit with the lowest NLL values
-* TCanvases of any fit that replaces the previous best fit (has a lower nll value)
-* Profile likelihood plots of each parameter, used for getting errors.
+* A TTree containing all data about the fits including parameter values, status, nll value.
+* Profile likelihood TGraph of each parameter, used for getting errors.
+* Plot of the background + simulation + source data for the best fit parameters.
 
 ## Output of fitSim_emcee_simultaneous.py:
-* Sampler output
+* Sampler output (csv file)
 * Corner plots with quantiles
 * Trace plots
 * Plot of best fit parameters
@@ -25,9 +21,8 @@ The user must input the names of their TTrees, branches corresponding to channel
 ## Notes/pitfalls:
 * When specifying fit ranges and variable import ranges, care should be taken that the import range (lowerEnergyBound, upperEnergyBound) are greater than the fit range. Data outside the fit range needs to be imported, as it can be smeared into the fit range when the energy resolution parameters are applied.
 * Thresholds are not modeled, so care should be taken to ensure the fit range is far enough away from threshold such that the fits are not being affected by threshold effects.
-* Binning can affect fits, so studies should be done on how binning influences the fits and errors should be manually incorporated into the final parameter values. 
-* RooKeysPDFs need to do a good job approximating the data over the fit range. This should be checked for background RooKeysPdf and first few simulation RooKeysPdfs. The Mirroring option, and interpolation number (last argument when generating the RooKeysPdfs) may need to be adjusted.
-* By default warnings are reduced, it's probably a good idea to turn these back on in the RooFit settings section and the fitTo command.
+* Binning and fit range are nuisance parameters, so some studies should be done on how these quantities affect fit results and errors. 
+* If the background PDF type is a RooKeysPDF, care should be taken to check this does a good job approximating the background data. The Mirroring option, and interpolation number (last argument when generating the RooKeysPdfs) may need to be adjusted.
 
 ## Known bugs:
 * There is a known issues with root 6.18/00 and 6.18.02
