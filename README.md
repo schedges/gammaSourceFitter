@@ -7,16 +7,16 @@ This code was originally designed to be used to calibrate liquid scintillator de
 ## How to use the code:
  The user must specify some set-up at the start of the code (binning, background pdf type, file paths, tree/branch names, channel numbers, etc.) The code assumes the background data tree structure and source data tree structure follow the same structure. Ranges for resolution and energy conversion variables needs to be specified. 
 
-## Output of fitSim_floatAmplitude.py:
-* A TTree containing all data about the fits including parameter values, status, nll value.
-* Profile likelihood TGraph of each parameter, used for getting errors.
-* Plot of the background + simulation + source data for the best fit parameters.
-
 ## Output of fitSim_emcee_simultaneous.py:
 * Sampler output (csv file)
 * Corner plots with quantiles
 * Trace plots
 * Plot of best fit parameters
+
+## Output of fitSim_floatAmplitude.py:
+* A TTree containing all data about the fits including parameter values, status, nll value.
+* Profile likelihood TGraph of each parameter, used for getting errors.
+* Plot of the background + simulation + source data for the best fit parameters.
 
 ## Notes/pitfalls:
 * When specifying fit ranges and variable import ranges, care should be taken that the import range (lowerEnergyBound, upperEnergyBound) are greater than the fit range. Data outside the fit range needs to be imported, as it can be smeared into the fit range when the energy resolution parameters are applied.
