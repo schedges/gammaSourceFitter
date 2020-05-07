@@ -26,6 +26,7 @@ This code was originally designed to be used to calibrate liquid scintillator de
 
 ## Known bugs:
 * There is a known issues with root 6.18/00 and 6.18.02
+* This issue is present for large numbers of walkers and steps, I think pickling the sampler and resuming it should be fine for generating more steps if needed. https://root-forum.cern.ch/t/non-linear-increase-of-execution-time-when-generating-more-toys/27411
 
 ## Theory:
 ### Liquid scintillators 
