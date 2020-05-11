@@ -634,7 +634,7 @@ with Pool() as pool:
   pos, prob, state  = sampler.run_mcmc(pos, nBurnInSteps, progress=True)
   print("Burn-in complete! Mean acceptance fraction: {0:.3f}".format(numpy.mean(sampler.acceptance_fraction)))
   sampler.reset()
-  pos, prob, state  = sampler.run_mcmc(state,nSteps,progress=True)
+  pos, prob, state  = sampler.run_mcmc(pos,nSteps,progress=True)
 
 ###########################MC PLOTTING HERE#####################################
 #My computer doesn't have python-tk, so I can't view plots and had to save them
