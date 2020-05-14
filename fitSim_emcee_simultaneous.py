@@ -21,8 +21,14 @@
 # named "bgnd.root". Inside each source subfolder should be a file named
 # <source name>.root and <source name>sim.root. 
 #
-# Note: sources to calibrate in ls<channel num> folder are hardcoded, as is the 
-# range to fit.
+# Notes: 
+#   - sources to calibrate in ls<channel num> folder are hardcoded, as is the 
+#     range to fit.
+#   - I've had slowdowns with RooFit when calling createNll too many times. This
+#     appears to be a known bug. The solution is to take advantage of the emcee
+#     h5py backend and break up the run into multiple
+#   - If your normalization is off, you may want to let the background pdf amp
+#     float.
 
 import ROOT
 import numpy
@@ -234,7 +240,7 @@ for entry in range(0,nBgndEntries):
       #Set value of observable
       energyVar.setVal(dataTreeEnergy[0])
       #Add to data set
-      bgndDataSet.add(ROOT.RooArgSet(energyVar))
+      bgndDataSet.add(argSet)
 
 #Get length or run for normalization
 #Get first entry
@@ -410,12 +416,6 @@ f = lambda x,alpha,beta,gamma: numpy.sqrt( numpy.power(alpha*x,2) + numpy.power(
 
 #Returns 0 if all parameters are in their allowed range, otherwise -infinity
 def lnprior(theta):
-  global nllTimes
-  global smearingTimes
-  global samplingTimes
-  global dataSetFillingTimes
-  global loopTimes
-
   #Check if all parameters in range 
   allParsInRange=1
   for i in range(0,len(theta)):
@@ -430,11 +430,8 @@ def lnprior(theta):
   
 #This is our RooFit function that returns the POSITIVE log likelihood
 def lnlike(theta):
-
-
-  #energyVar gets modified in loop. So far hasn't caused any issues 
+  #energyVar gets modified in loop. So far hasn't caused any issues with multiprocessing
   global energyVar
-  global times
 
   # Reset nllVal to zero because we'll add to this for each source we generate
   # an nll value for
@@ -471,30 +468,9 @@ def lnlike(theta):
     
     #Make smeared data set
     smearedSimDataSet=ROOT.RooDataSet("smearedSimDataSet","smearedSimDataSet",argSet)
-
-    '''
-    #numpy array->RooDataSet->RooDataHist->RooHistPdf
-    # ~5 secs/it
-    #Convert with slope/offset
-    for smearedVal in flatArray:
-      testVal=slope*(smearedVal-offset)  
-      if (testVal >= fitRangeMin) and (testVal <= fitRangeMax):
-        energyVar.setVal(testVal)
-        smearedSimDataSet.addFast(argSet)
-        # If this ever shows up the code will have to be changed because the 
-        # different processes are simultaneously setting energyVar to different 
-        # values...
-        if energyVar.getVal()!=testVal:
-          print("WARNING!!!! Energy val should be "+str(testVal)+" but in reality is"+str(energyVar.getVal()))
-        
-    #Make sim pdf
-    (smearedSimDataSet.get().find("energyVar")).setBins(nBins)
-    smearedSimDataHist = smearedSimDataSet.binnedClone("smearedSimDataHist")
-    simPdf = ROOT.RooHistPdf("simPdf","simPdf",argSet,smearedSimDataHist,0) #1 specifies interpolation order
-    '''
     
     #Numpy array->TH1->RooDataHist->RooHistPdf
-    #~0.03 seconds!!!
+    #~0.03 seconds, much faster than iterating through array to fill
     w=numpy.full(flatArray.size,1.)
     h=ROOT.TH1D("h","",nBins,lowerEnergyBound,upperEnergyBound)
     h.FillN(flatArray.size,flatArray,w)
@@ -503,7 +479,6 @@ def lnlike(theta):
     h.Delete()
     del h
     
-
     ##Make Model
     pdfList = ROOT.RooArgList(bgndDataPdf,simPdf)
     ampList = ROOT.RooArgList(scaledBgndEntriesVars[sourceNum],sourceCountsVar)
@@ -511,7 +486,6 @@ def lnlike(theta):
     model.fixCoefRange("fitRange")
     
     #Compute nll
-    #True BatchMode(bool) to see if speed increases
     nll = model.createNLL(sourceDataHists[sourceNum],
       ROOT.RooFit.Extended(1),
       ROOT.RooFit.Verbose(0),
@@ -529,9 +503,9 @@ def lnlike(theta):
       except NameError:
         c1=ROOT.TCanvas("c1","c1")
       
-      #Reduce integrator for plotting, massively speeds things up
-      ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-4)
-      ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-4)
+      #Reduce integrator for plotting, massively speeds plotting
+      ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-5)
+      ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-5)
       
       frame = energyVar.frame(lowerEnergyBound,upperEnergyBound,nBins)
       frame.SetTitle(calibrationSources[sourceNum]+": alpha="+str(alpha)+", beta="+str(beta)+", gamma="+str(gamma)+", slope="+str(slope)+", offset="+str(offset))
@@ -541,8 +515,7 @@ def lnlike(theta):
         frame,
         ROOT.RooFit.Name("Source"),
         ROOT.RooFit.MarkerColor(1),
-        ROOT.RooFit.FillColor(0),
-        ROOT.RooFit.Range("fitRange")
+        ROOT.RooFit.FillColor(0)
       )
       #Plot components
       model.plotOn(
@@ -551,8 +524,7 @@ def lnlike(theta):
         ROOT.RooFit.Components("bgndDataPdf"),
         ROOT.RooFit.LineColor(ROOT.kSolid),
         ROOT.RooFit.FillColor(0),
-        ROOT.RooFit.ProjWData(sourceDataSets[sourceNum]),
-        ROOT.RooFit.Range("fitRange")
+        ROOT.RooFit.ProjWData(sourceDataSets[sourceNum])
       )
       model.plotOn(
         frame,ROOT.RooFit.Name("Sim"),
@@ -560,8 +532,7 @@ def lnlike(theta):
         ROOT.RooFit.LineColor(ROOT.kRed),
         ROOT.RooFit.FillColor(0),
         ROOT.RooFit.ProjWData(sourceDataSets[sourceNum]),
-        ROOT.RooFit.AddTo("Bgnd"),
-        ROOT.RooFit.Range("fitRange")
+        ROOT.RooFit.AddTo("Bgnd")
       )
       
       #Draw
@@ -582,6 +553,14 @@ def lnlike(theta):
       c1.Modified()
       c1.Update()
       c1.SaveAs(plotPath+"bestFit_simultaneous_"+calibrationSources[sourceNum]+"_ch"+calibrationChannel+".pdf")
+      
+      #Reset integrator for step size
+      ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-7)
+      ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-7)
+      
+      #Memory management for plotting
+      frame.Delete()
+      del Frame()
       
     #Memory management
     smearedSimDataSet.reset()
@@ -641,9 +620,9 @@ with Pool() as pool:
 #as a PDF to look at the results 
 matplotlib.use('PDF')
 
-#GET THE LL VALUES--FROM GRAYSON'S CODE--Do this first in case plotting fails
+#GET THE LL VALUES--From grayson's code--do this first in case plotting fails.
 samples=sampler.flatchain
-lnprobs = sampler.lnprobability[:,nBurnInSteps:]
+lnprobs = sampler.lnprobability[:,:]
 flatLnprobs = lnprobs.reshape(-1)
 with open(plotPath+"sampler_simultaneous_ch"+calibrationChannel+".csv", 'w') as sampleOutFile:
   theWriter = csvlib.writer(sampleOutFile, delimiter=',')
