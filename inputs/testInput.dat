@@ -1,0 +1,68 @@
+#Input file for fitting code. Intended to fit one channel at a time, with multiple sources fit simultaneously. Expects common background data for all simes (normalization floats)
+#Don't be dumb and mess up my dumb parsing code by having commas, colons, quotes, or brackets in your arguments
+#
+#Prepended to output files
+title : ch01
+#Fitting meta-parameters
+#"fit" to fit data, "guess" to launch interactice code for guessing parameters
+runType : fit
+#"fixed" for  binned PDF, "variable" for variable binning
+binningType : fixed
+#Either # of bins or interpolation parameter (recommended is 1) or list of bin edges (including low and high boundaries)
+binningParameter : 200
+#Range to fit
+fitRange : [4500,50000]
+#Range for resolution parameters for FWHM/E : sqrt(alpha^2 + beta^2/E^2 + gamma^2/E^2). Set to single value for constant
+alphaRange : [0.001,0.06]
+betaRange : [0.0001,0.04]
+gammaRange : [0.001,0.05]
+#Calibration parameter ranges for MeV : ADC/m + b where b is a small offset (typically 0.005 MeV). Single value for constant parameter
+slopeRange : [20000,60000]
+offsetRange : [0.005]
+#Allow sim counts to float within this factor of the expected # of counts. Same values for all sources
+simScalingRange : [0.9,1.05]
+#Can limit the maximum # of sim entries loaded if you don't want to load all. Set to <:0 if you want to use all
+maxSimEntries: 50000  
+#Should be at least 2x ndim, but emcee recommends "hundreds"
+nWalkers : 1000 
+#Ideally several auto-correlation length
+nBurnInSteps : 100
+#Ideally 10x autocorrelation length
+nSteps : 800
+
+#Background data
+#Name for the PDF to appear in plots
+bgndName:"Bgnd"
+#Path to file
+bgndFilePath : /home/sch52/data/all_ls_bgnd/bgnd.root
+#tree name
+bgndTreeName : analysisTree
+#energy equivalent branch
+bgndEnergyBranchName : LS_integral
+#Normalization is either fixed (in consistent units for bgnd and data) or branch to determine from a time branch in the tree
+bgndNormalization : branch
+#Either length if "fixed" or branch name if "branch"
+bgndNormalizationParameter : LS_waveformStartTime
+#Additional cuts to apply to tree (such as "channelID::1&&saturation::0")
+bgndAdditionalCuts:"LS_channel==1&&LS_waveformSaturates==0"
+
+#Source data - Input as lists for each source. Put sims in same order
+#Name for PDF to appear in plots
+sourceNames : ["Cs137","Co60",Na22]
+#Paths to files
+sourcePaths : [/home/sch52/data/bd1/cs137/cs137.root,/home/sch52/data/bd1/co60/co60.root,/home/sch52/data/bd1/na22/na22.root]
+#Require 
+sourceTreeName : [analysisTree]
+sourceEnergyBranchName : [LS_integral]
+sourceNormalization : [branch]
+sourceNormalizationParameter : [LS_waveformStartTime]
+sourceAdditionalCuts : ["LS_channel==1&LS_waveformSaturates==0"]
+
+#Sim data - Should match source data ordering
+simNames : ["Cs137","Co60",Na22]
+simPaths : [/home/sch52/data/sims/cs137.root,/home/sch52/data/sims/co60.root,/home/sch52/data/sims/na22.root]
+simTreeName : processedTree
+simBranchName : energy
+#Branch units--either keV or MeV, we'll convert to MeV under thehood
+simBranchUnits : "MeV"
+simAdditionalCuts : "cellNum==6"

@@ -13,6 +13,7 @@ import matplotlib
 
 #Make sure process is single-threaded, we'll use multiprocessing library instead
 os.environ["OMP_NUM_THREADS"] = "1"
+nCores=multiprocessing.cpu_count()-1
 
 # Reduces warning messages.
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
@@ -154,6 +155,11 @@ bgndHistPdf = ROOT.RooHistPdf("bgndHistPdf","bgndHistPdf",argSet,bgndDataHist,0)
 expectedBackgroundCounts=[]
 for i in range(0,nSources):
     expectedBackgroundCounts.append(bgndObject.countsInFitRange*sourceObjects[i].normalization/float(bgndObject.normalization))
+#TODO: dead time calculator. 
+#source run rate - bgnd run rate = increased source rate. 
+#Increased source rate * waveform length = fractional dead time
+#Expected bgnd rates (w/dead time) = expectedBackgroundCounts*(1-fractional dead time)
+   
 expectedSourceCounts=[]
 for i in range(0,nSources):
     expectedSourceCounts.append(sourceObjects[i].countsInFitRange-expectedBackgroundCounts[i])
@@ -240,9 +246,11 @@ def lnlike(theta):
       ROOT.RooFit.Verbose(0),
       ROOT.RooFit.NumCPU(1)
     )
+    ROOT.SetOwnership(nll,True)
     
     #Make NLL positive
     nllVal += (-1*nll.getVal())
+
       
     if PLOT==1:     
         modelHist=hist.Clone("modelHist")
@@ -254,11 +262,7 @@ def lnlike(theta):
         bgndHist=ROOT.RooAbsData.createHistogram(bgndDataHist,"energyVar",energyVar,ROOT.RooFit.Binning("binning"))
         bgndCounts=expectedBackgroundCounts[i]
         
-        print(expectedSourceCounts[i])
-        print(sourceScaling)
         simCounts=sourceScaling*expectedSourceCounts[i]
-        print(sourceObjects[i].name,sourceCounts,bgndCounts,simCounts)
-        
         helperFns.plotResults(sourceHist,sourceCounts,bgndHist,bgndCounts,tempHist,simCounts,modelHist,title+"_fit_"+sourceObjects[i].name)
         del sourceDataHist
         del sourceHist
@@ -290,7 +294,7 @@ def lnprob(theta):
 
 
 ##########################MC RUN STARTS HERE####################################
-with multiprocessing.Pool() as pool:
+with multiprocessing.Pool(nCores) as pool:
   sampler = emcee.EnsembleSampler(nWalkers,ndim,lnprob,pool=pool)
   #Burn in
   print("Starting burn in...")
@@ -308,7 +312,7 @@ matplotlib.use('PDF')
 samples=sampler.flatchain
 lnprobs = sampler.lnprobability[:,:]
 flatLnprobs = lnprobs.reshape(-1)
-with open(title+"_sampler.csv", 'w') as samplerOutFile:
+with open("sampler_"+title+".csv", 'w') as samplerOutFile:
   theWriter = csvlib.writer(samplerOutFile, delimiter=',')
   for sampleLine, llval in zip(samples, flatLnprobs):
     theWriter.writerow(np.append(sampleLine,llval))
@@ -321,12 +325,12 @@ for i in range(0,ndim):
   axes = fig.add_subplot(gs[i,:])
   axes.plot(sampler.chain[:,:,i].T, '-', color='k', alpha=0.3)
   axes.set_title(labels[i])
-plt.savefig(title+"_traces.pdf")
+plt.savefig("tracePlot_"+title+".pdf")
 
 #CORNER PLOT HERE 
 samples=sampler.flatchain
 fig = corner.corner(samples, labels=labels, ranges=ranges, quantiles=[0.16,0.5,0.84],show_titles=True,title_kwargs={'fontsize':12})
-fig.savefig(title+"corner.pdf")
+fig.savefig("corner_"+title+".pdf")
 
 #CALCULATE QUANTILES HERE
 bestFitValues=[]
