@@ -9,6 +9,8 @@ Welcome to Gamma Source Fitter's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   
+   Phyiscs
 
 
 
@@ -18,3 +20,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+* :ref:`Physics`
