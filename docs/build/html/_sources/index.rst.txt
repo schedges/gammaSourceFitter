@@ -1,0 +1,16 @@
+Gamma Source Fitter Documentation
+==================================
+
+Quick Links
+^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Contents:
+   
+   Physics
+   Requirements
+   Usage
+   Troubleshooting
+   Help
+
