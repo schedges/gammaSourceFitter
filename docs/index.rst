@@ -6,11 +6,23 @@
 Welcome to Gamma Source Fitter's documentation!
 ===============================================
 
+
+Phyiscs
+^^^^^^^   
+
+Requirements
+^^^^^^^^^^^^
+
+Usage
+^^^^^^^^^^^^^^^
+
+Troubleshooting
+^^^^^^^^^^^^^^^
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
    
-   Phyiscs
 
 
 
