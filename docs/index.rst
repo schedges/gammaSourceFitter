@@ -1,7 +1,8 @@
 Gamma Source Fitter Documentation
 =================================
+https://github.com/schedges/gammaSourceFitter
 
-Documentation for python code to fit gamma calibration sources given source data, background data, and a sim. Includes required packages, basic usage, physics overview, and troubleshooting advice
+Documentation for python code to fit gamma calibration sources given source data, background data, and a sim. Includes required packages, basic usage, physics overview, and troubleshooting advice.
 
 .. toctree::
    :maxdepth: 2
